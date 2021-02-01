@@ -1,5 +1,7 @@
 const { request } = require("http")
 const express = require("express")
+const logger = require("morgan")
+const bodyparser = require("body-parser")
 
 const admin = require("./route/admin")
 const content = require("./route/constent")
@@ -14,11 +16,21 @@ nunjucks.configure("template", {
   express: app,
 })
 
+// 미들웨어 세팅
+app.use(logger("dev"))
+app.use(bodyparser.json())
+app.use(bodyparser.urlencoded({ extended: false }))
+
 app.get("/", (req, res) => {
   res.send("hello express")
 })
 
-app.use("/admin", admin)
+function vipmiddle(req, res, next) {
+  console.log("최우선 미들웨어")
+  next()
+}
+
+app.use("/admin", vipmiddle, admin)
 app.use("/content", content)
 
 app.listen(port, () => {
